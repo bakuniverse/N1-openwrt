@@ -25,6 +25,7 @@ env:
   SCRIPT_SH: script.sh
   CONFIG_SH: config.sh
   UPLOAD_FIRMWARE: true
+  DELETE_RELEASE: true
   TZ: Asia/Shanghai
 
 jobs:
