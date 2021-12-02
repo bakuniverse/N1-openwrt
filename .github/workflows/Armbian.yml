@@ -30,6 +30,7 @@ on:
 env:
   TZ: Asia/Shanghai
   UPLOAD_FIRMWARE: true
+  UPLOAD_RELEASE: true
 
 jobs:
   build:
@@ -116,7 +117,7 @@ jobs:
       - name: Upload Armbian image to Release
         id: release
         uses: ncipollo/release-action@v1
-        if: steps.make.outputs.status == 'success' && env.UPLOAD_RELEASE == 'true' && !cancelled()
+        if: steps.organize.outputs.status == 'success' && env.UPLOAD_RELEASE == 'true' && !cancelled()
         with:
          tag: Armbian_Aml_buster_${{ env.FILE_DATE }}
          artifacts: ${{ env.UPLOAD_PATH }}/*
