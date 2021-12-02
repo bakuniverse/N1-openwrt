@@ -1,0 +1,134 @@
+name: Build Armbian
+
+on:
+  workflow_dispatch:
+    inputs:
+      boards:
+        description: "BOARD"
+        required: true
+        default: "phicomm-n1"
+      branch:
+        description: "BRANCH"
+        required: true
+        default: "current"
+      release:
+        description: "RELEASE"
+        required: true
+        default: "bullseye"
+      kernelOnly:
+        description: "KERNEL_ONLY"
+        required: true
+        default: "no"
+      override:
+        description: "override files"
+        required: true
+        default: "yes"
+      exclude:
+        description: "exclude files"
+        required: false
+
+env:
+  TZ: Asia/Shanghai
+  UPLOAD_FIRMWARE: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Maximize build space
+        uses: easimon/maximize-build-space@master
+        with:
+          root-reserve-mb: 10240
+          remove-dotnet: "true"
+          remove-android: "true"
+          remove-haskell: "true"
+
+      - name: Initialization environment
+        run: |
+          echo "Free space:"
+          df -hT
+          sudo timedatectl set-timezone "$TZ"
+      - name: Checkout self
+        uses: actions/checkout@v2
+
+      - name: Checkout Armbian build script
+        uses: actions/checkout@v2
+        with:
+          path: build
+          repository: armbian/build
+          ref: master
+
+      - name: Override file
+        run: |
+          if [[ "${{ github.event.inputs.override }}" == "yes" && -d override ]]; then
+            echo "Copy override files..."
+            cp -af override/* build/
+          fi
+          if [[ -n "${{ github.event.inputs.exclude }}" ]]; then
+            for file in $(echo ${{ github.event.inputs.exclude }} | sed 's/,/ /g')
+            do
+              echo "find exclude file: $file"
+              filePath=$(find build/ -name "$file")
+              if [[ -n "$filePath" ]]; then
+                echo "delete file: $filePath"
+                rm -rf $filePath;
+              fi
+            done
+          fi
+          echo "FILE_DATE=$(date +"%Y%m%d%H%M")" >> $GITHUB_ENV
+          
+      - name: Build Armbian
+        id: build
+        run: |
+          cd build
+          COMPILE_PARAMS="BOARD=\"${{ github.event.inputs.boards }}\" \
+          BRANCH=\"${{ github.event.inputs.branch }}\" \
+          RELEASE=\"${{ github.event.inputs.release }}\" \
+          KERNEL_ONLY=\"${{ github.event.inputs.kernelOnly }}\" \
+          KERNEL_CONFIGURE=\"no\" \
+          BUILD_MINIMAL=\"no\" \
+          BUILD_DESKTOP=\"no\" \
+          COMPRESS_OUTPUTIMAGE=\"yes\" \
+          EXPERT=\"yes\" \
+          EXTRAWIFI=\"no\" \
+          WIREGUARD=\"no\""
+          echo "compile params: ${COMPILE_PARAMS}"
+          sudo ./compile.sh ${COMPILE_PARAMS}
+          echo "::set-output name=status::success"
+          
+      - name: Organize files
+        id: organize
+        if: steps.build.outputs.status == 'success'
+        run: |
+          mkdir -p ${FILE_DATE}
+          cd ${FILE_DATE}
+          echo "UPLOAD_PATH=${PWD}" >> $GITHUB_ENV
+          [[ -d ${GITHUB_WORKSPACE}/build/output ]] && sudo mv -f ${GITHUB_WORKSPACE}/build/output/images ./
+          echo "::set-output name=status::success"
+          
+      - name: Upload output
+        uses: kittaakos/upload-artifact-as-is@master
+        if: steps.build.outputs.status == 'success' && env.UPLOAD_FIRMWARE == 'true' && !cancelled()
+        with:
+          path: ${{ env.UPLOAD_PATH }}
+
+      - name: Delete workflow runs
+        uses: Mattraks/delete-workflow-runs@main
+        with:
+          retain_days: 1
+          keep_minimum_runs: 2
+          
+      - name: Upload Armbian image to Release
+      id: release
+      uses: ncipollo/release-action@v1
+      if: steps.make.outputs.status == 'success' && env.UPLOAD_RELEASE == 'true' && !cancelled()
+      with:
+        tag: Armbian_Aml_buster_${{ env.FILE_DATE }}
+        artifacts: ${{ env.UPLOAD_PATH }}/*
+        allowUpdates: true
+        token: ${{ secrets.RELEASES_TOKEN }}
+        body: |
+          This is Armbian image 
+          Default username: root
+          Default password: 1234
