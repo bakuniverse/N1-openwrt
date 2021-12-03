@@ -104,11 +104,13 @@ jobs:
         run: |
           mkdir -p ${FILE_DATE}
           cd ${FILE_DATE}
-          echo "UPLOAD_PATH=${PWD}" >> $GITHUB_ENV
           [[ -d ${GITHUB_WORKSPACE}/build/output ]] && sudo mv -f ${GITHUB_WORKSPACE}/build/output/images ./
+          cd ${FILE_DATE}/images
+          sudo gzip *.7z && sync
+          echo "UPLOAD_PATH=${PWD}" >> $GITHUB_ENV
           echo "::set-output name=status::success"
           
-      - name: Upload output
+      - name: Upload artifact to Actions
         uses: kittaakos/upload-artifact-as-is@master
         if: steps.build.outputs.status == 'success' && env.UPLOAD_FIRMWARE == 'true' && !cancelled()
         with:
