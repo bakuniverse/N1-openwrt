@@ -105,7 +105,9 @@ jobs:
           mkdir -p ${FILE_DATE}
           cd ${FILE_DATE}
           [[ -d ${GITHUB_WORKSPACE}/build/output ]] && sudo mv -f ${GITHUB_WORKSPACE}/build/output/images ./
-          cd ${FILE_DATE}/images
+          ls
+          cd ./images
+          ls
           sudo gzip *.7z && sync
           echo "UPLOAD_PATH=${PWD}" >> $GITHUB_ENV
           echo "::set-output name=status::success"
