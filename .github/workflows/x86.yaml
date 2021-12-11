@@ -117,7 +117,7 @@ jobs:
       if: env.UPLOAD_FIRMWARE == 'true' && !cancelled()
       run: |
         cd openwrt/bin/targets/*/*
-        rm -rf packages openwrt-x86-64-generic-kernel.bin openwrt-x86-64-generic-squashfs-combined-efi.vmdk sha256sums version.buildinfo feeds.buildinfo openwrt-armvirt-64-rootfs-ext4.img
+        rm -rf packages openwrt-x86-64-generic-kernel.bin openwrt-x86-64-generic-squashfs-combined-efi.vmdk sha256sums version.buildinfo feeds.buildinfo openwrt-armvirt-64-rootfs-ext4.img openwrt-x86-64-generic.manifest
         echo "FIRMWARE=$PWD" >> $GITHUB_ENV
         echo "::set-output name=status::success"
         
