@@ -12,8 +12,8 @@ on:
     branches:
       - main
     paths:
-      - 'script.sh'
-      - 'config.sh'
+      - 'script1.sh'
+      - 'config1.sh'
   schedule:
     - cron: 0 8 * * 0
 
