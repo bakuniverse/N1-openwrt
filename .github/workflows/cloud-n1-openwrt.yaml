@@ -26,6 +26,7 @@ env:
   CONFIG_SH: config.sh
   UPLOAD_FIRMWARE: true
   DELETE_RELEASE: true
+  KEEP_MININUM_RELEASE: 5
   TZ: Asia/Shanghai
 
 jobs:
@@ -145,7 +146,7 @@ jobs:
       uses: dev-drprasad/delete-older-releases@v0.1.0
       if: env.DELETE_RELEASE == 'true'
       with:
-        keep_latest: 6
+        keep_latest: 7
         delete_tags: true
       env:
         GITHUB_TOKEN: ${{ secrets.RELEASES_TOKEN }}
