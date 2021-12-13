@@ -126,13 +126,13 @@ jobs:
       uses: actions/upload-artifact@v2
       if: steps.organize.outputs.status == 'success' && !cancelled()
       with:
-        name: OpenWrt_firmware
+        name: OpenWrt_x86_firmware
         path: ${{ env.FIRMWARE }}
 
     - name: Create release
       uses: ncipollo/release-action@v1
       with:
-        name: ${{ env.DATE }} ❤️ | X86-OpenWrt 自动编译
+        name: ${{ env.DATE }} X86-OpenWrt 自动编译
         allowUpdates: true
         tag: ${{ env.tag_name }}
         commit: main
