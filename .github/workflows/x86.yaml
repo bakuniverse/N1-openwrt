@@ -46,6 +46,13 @@ jobs:
       run: |
         docker rmi `docker images -q`
         sudo rm -rf /usr/share/dotnet /etc/mysql /etc/php /etc/apt/sources.list.d
+        sudo dpkg -r mysql-client-5.7
+        sudo dpkg -r mysql-server-5.7
+        sudo dpkg -r libmysqlclient20:i386
+        sudo dpkg -r libmysqlclient20:amd64
+        sudo dpkg -r libmysqlclient18:amd64
+        sudo dpkg -r mysql-common
+        sudo dpkg -r mysql 
         sudo -E apt-get -y purge azure-cli ghc* zulu* hhvm llvm* firefox google* dotnet* powershell openjdk* mysql* php*
         sudo -E apt-get update
         sudo -E apt-get -qq install $(curl -fsSL git.io/ubuntu-2004-server)
