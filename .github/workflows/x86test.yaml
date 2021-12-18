@@ -1,4 +1,4 @@
-name: X86 OpenWrt
+name: X86pass OpenWrt
 
 on:
   repository_dispatch:
@@ -20,10 +20,10 @@ on:
 env:
   REPO_URL: https://github.com/coolsnowwolf/lede
   REPO_BRANCH: master
-  FEEDS_CONF: feeds.conf.default1
+  FEEDS_CONF: feeds.conf.default
   CONFIG_FILE: .config
-  SCRIPT_SH: script1.sh
-  CONFIG_SH: config1.sh
+  SCRIPT_SH: script2.sh
+  CONFIG_SH: config2.sh
   UPLOAD_FIRMWARE: true
   DELETE_RELEASE: true
   KEEP_MININUM_RELEASE: 7
@@ -125,7 +125,7 @@ jobs:
       uses: actions/upload-artifact@v2
       if: steps.organize.outputs.status == 'success' && !cancelled()
       with:
-        name: OpenWrt_x86_firmware
+        name: OpenWrt_x86_pass_firmware
         path: ${{ env.FIRMWARE }}
 
     - name: Create release
