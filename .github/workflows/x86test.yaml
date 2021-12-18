@@ -12,8 +12,8 @@ on:
     branches:
       - main
     paths:
-      - 'script1.sh'
-      - 'config1.sh'
+      - 'script2.sh'
+      - 'config2.sh'
   schedule:
     - cron: 0 8 * * 0
 
@@ -131,7 +131,7 @@ jobs:
     - name: Create release
       uses: ncipollo/release-action@v1
       with:
-        name: ${{ env.DATE }} X86-OpenWrt 自动编译
+        name: ${{ env.DATE }} X86pass-OpenWrt 自动编译
         allowUpdates: true
         tag: ${{ env.tag_name }}
         commit: main
