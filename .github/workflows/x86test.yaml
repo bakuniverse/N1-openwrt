@@ -68,9 +68,7 @@ jobs:
         useVersionInfo=$(git show -s --date=short --format="date: %cd<br/>commit: %s<br/>commit hash: %H")
         echo "useVersionInfo=$useVersionInfo" >> $GITHUB_ENV
         echo "DATE=$(date "+%Y-%m-%d %H:%M:%S")" >> $GITHUB_ENV
-        echo "tag_name1=$(date +%Y%m%d)" >> $GITHUB_ENV
-        echo "tag_name2=2" >> $GITHUB_ENV
-        echo "tag_name=`echo "scale=0;$[$tag_name1+tag_name2]" | bc`" >> $GITHUB_ENV
+        echo "tag_name=x86_pass$(date +%Y%m%d)" >> $GITHUB_ENV
         
     - name: Update feeds
       run: |
