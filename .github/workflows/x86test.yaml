@@ -69,7 +69,7 @@ jobs:
         echo "useVersionInfo=$useVersionInfo" >> $GITHUB_ENV
         echo "DATE=$(date "+%Y-%m-%d %H:%M:%S")" >> $GITHUB_ENV
         echo "tag_name1=$(date +%Y%m%d)" >> $GITHUB_ENV
-        echo "tag_name=$[tag_name1+2]" >> $GITHUB_ENV
+        echo "tag_name=`echo "scale=0;$[$tag_name1+2]" | bc`" >> $GITHUB_ENV
         
     - name: Update feeds
       run: |
