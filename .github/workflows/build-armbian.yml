@@ -9,7 +9,7 @@ on:
         required: false
         default: 'lepotato'
   schedule:
-    - cron: '8 * 5 * *'
+    - cron: '8 * 2 * *'
 
 env:
   UPLOAD_FIRMWARE: true
