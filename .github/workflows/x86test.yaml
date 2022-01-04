@@ -13,7 +13,7 @@ on:
       - main
     paths:
       - 'script2.sh'
-      - 'config2.sh'
+      - 'config3.sh'
   schedule:
     - cron: 0 8 * * 0
 
@@ -23,7 +23,7 @@ env:
   FEEDS_CONF: feeds.conf.default
   CONFIG_FILE: .config
   SCRIPT_SH: script2.sh
-  CONFIG_SH: config2.sh
+  CONFIG_SH: config3.sh
   UPLOAD_FIRMWARE: true
   DELETE_RELEASE: true
   KEEP_MININUM_RELEASE: 7
