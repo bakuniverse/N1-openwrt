@@ -8,8 +8,7 @@ on:
         description: 'Optional: lepotato / odroidn2'
         required: false
         default: 'lepotato'
-  schedule:
-    - cron: '8 * 2 * *'
+
 
 env:
   UPLOAD_FIRMWARE: true
