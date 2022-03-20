@@ -9,3 +9,4 @@ src-git telephony https://git.openwrt.org/feed/telephony.git
 src-git diy1 https://github.com/xiaorouji/openwrt-passwall
 src-git diy2 https://github.com/xiaorouji/openwrt-passwall.git;luci
 src-git mos https://github.com/QiuSimons/openwrt-mos
+src-git diy3 https://github.com/xiaorouji/openwrt-passwall2
