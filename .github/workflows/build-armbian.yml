@@ -94,4 +94,13 @@ jobs:
           This is Armbian image for amlogic s9xxx STB
           * Firmware information
           Default username: root
-          Default password: 1234
+          Default password: 1234    
+          
+    - name: Remove old Releases
+      uses: dev-drprasad/delete-older-releases@v0.1.0
+      if: env.DELETE_RELEASE == 'true'
+      with:
+        keep_latest: 7
+        delete_tags: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.RELEASES_TOKEN }}
