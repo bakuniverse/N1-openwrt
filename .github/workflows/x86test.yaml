@@ -74,11 +74,11 @@ jobs:
       run: |
         [ -e files ] && mv files openwrt/files
         [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
-        chmod +x $SCRIPT_SH
-        ./$SCRIPT_SH
         cd openwrt
         sed -i 's/#src-git helloworld/src-git helloworld/g' ./feeds.conf.default
         ./scripts/feeds update -a
+        chmod +x $SCRIPT_SH
+        ./$SCRIPT_SH
         
     - name: Install feeds
       run: |
