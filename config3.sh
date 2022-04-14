@@ -265,3 +265,5 @@ CONFIG_PACKAGE_vsftpd-alt=y
 CONFIG_PACKAGE_wireguard-tools=y
 CONFIG_VSFTPD_USE_UCI_SCRIPTS=y
 EOF
+svn co https://github.com/kenzok8/openwrt-packages/trunk/luci-app-smartdns package/luci-app-smartdns
+svn co https://github.com/kenzok8/openwrt-packages/trunk/smartdns feeds/packages/net/smartdns
