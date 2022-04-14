@@ -31,8 +31,6 @@ env:
   TZ: Asia/Shanghai
   UPLOAD_FIRMWARE: true
   UPLOAD_RELEASE: true
-  DELETE_RELEASE: true
-  KEEP_MININUM_RELEASE: 7
 
 jobs:
   build:
