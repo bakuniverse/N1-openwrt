@@ -175,6 +175,7 @@ CONFIG_PACKAGE_luci-app-passwall2_INCLUDE_Xray=y
 # end of Configuration
 # CONFIG_PACKAGE_luci-app-ramfree is not set
 # CONFIG_PACKAGE_luci-app-samba is not set
+CONFIG_PACKAGE_luci-app-smartdns=y
 # CONFIG_PACKAGE_luci-app-ttyd is not set
 # CONFIG_PACKAGE_luci-app-unblockmusic is not set
 # CONFIG_PACKAGE_luci-app-upnp is not set
@@ -188,6 +189,7 @@ CONFIG_PACKAGE_luci-compat=y
 CONFIG_PACKAGE_luci-i18n-netdata-zh-cn=y
 CONFIG_PACKAGE_luci-i18n-passwall-zh-cn=y
 CONFIG_PACKAGE_luci-i18n-passwall2-zh-cn=y
+CONFIG_PACKAGE_luci-i18n-smartdns-zh-cn=y
 # CONFIG_PACKAGE_luci-proto-wireguard is not set
 CONFIG_PACKAGE_microsocks=y
 CONFIG_PACKAGE_mount-utils=y
@@ -212,6 +214,7 @@ CONFIG_PACKAGE_smartmontools=y
 # CONFIG_PACKAGE_strongswan is not set
 CONFIG_PACKAGE_sysstat=y
 CONFIG_PACKAGE_tar=y
+CONFIG_PACKAGE_smartdns=y
 CONFIG_PACKAGE_tcping=y
 CONFIG_PACKAGE_transmission-daemon-openssl=y
 CONFIG_PACKAGE_transmission-web-control=y
