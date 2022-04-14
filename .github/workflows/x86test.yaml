@@ -77,8 +77,7 @@ jobs:
         cd openwrt
         sed -i 's/#src-git helloworld/src-git helloworld/g' ./feeds.conf.default
         ./scripts/feeds update -a
-        chmod +x $SCRIPT_SH
-        ./$SCRIPT_SH
+
         
     - name: Install feeds
       run: |
@@ -87,6 +86,8 @@ jobs:
         
     - name: Load custom configuration
       run: |
+        chmod +x $SCRIPT_SH
+        ./$SCRIPT_SH
         chmod +x $CONFIG_SH
         ./$CONFIG_SH
         
