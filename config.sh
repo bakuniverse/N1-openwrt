@@ -6787,3 +6787,4 @@ CONFIG_PACKAGE_tini=y
 # end of Xorg
 
 EOF
+sed -i 's/mosdns-neo/mosdns/g' ./feeds/mos/luci-app-mosdns/Makefile
