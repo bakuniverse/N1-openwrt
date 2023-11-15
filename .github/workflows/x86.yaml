@@ -1,151 +1,68 @@
-name: X86 OpenWrt
+name: Build-OpenWrt
 
 on:
-  repository_dispatch:
   workflow_dispatch:
-      inputs:
-      set_board:
-        description: 'Optional: lepotato / odroidn2'
-        required: false
-        default: 'lepotato'
   push:
     branches:
       - main
-    paths:
-      - 'script1.sh'
-      - 'config1.sh'
-  schedule:
-    - cron: 0 8 * * 0
-
-env:
-  REPO_URL: https://github.com/coolsnowwolf/lede
-  REPO_BRANCH: master
-  FEEDS_CONF: feeds.conf.default1
-  CONFIG_FILE: .config
-  SCRIPT_SH: script1.sh
-  CONFIG_SH: config1.sh
-  UPLOAD_FIRMWARE: true
-  DELETE_RELEASE: true
-  KEEP_MININUM_RELEASE: 7
-  TZ: Asia/Shanghai
+#  release:
+#    types: published
+#  schedule:
+#    - cron: 0 8 * * 5
+#  watch:
+#    types: started
+#  repository_dispatch:
 
 jobs:
-  build_openwrt:
-    name: Build OpenWrtx86 and release
-    runs-on: ubuntu-20.04
+  build:
+    runs-on: ubuntu-latest
+    if: github.event.repository.owner.id == github.event.sender.id
+    #    timeout-minutes: 360
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-      with:
-        ref: main
+      - name: Clone Repository
+        uses: actions/checkout@v3
+      - name: Init Compilation Dependencies
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: |
+          docker rmi $(docker images -q)
+          sudo -E apt-get -qq remove --purge azure-cli ghc zulu* hhvm llvm* firefox google* dotnet* powershell mysql* php* mssql-tools msodbcsql17 android*
+          sudo -E apt-get -qq update
+          sudo -E apt-get -qq full-upgrade
+          sudo -E apt-get -qq install build-essential asciidoc binutils bzip2 coreutils gawk gettext git libncurses5-dev libz-dev patch unzip zlib1g-dev lib32gcc1 libc6-dev-i386 subversion flex uglifyjs git-core gcc-8 gcc++-8 gcc-8-multilib g++-8-multilib p7zip p7zip-full msmtp libssl-dev texinfo libreadline-dev libglib2.0-dev xmlto qemu-utils upx libelf-dev autoconf automake libtool autopoint ccache curl wget vim nano python python3 python-pip python3-pip python-ply python3-ply haveged lrzsz device-tree-compiler scons antlr3 gperf ecj fastjar re2c xz-utils tar
+          for i in $(ls /usr/bin/*-8); do sudo -E ln -sf $i ${i%%-8*}; done
+          sudo -E ln -sf /usr/include/asm-generic /usr/include/asm
+          sudo -E apt-get -qq autoremove --purge
+          sudo -E apt-get -qq clean
+          sudo -E swapoff -a
+          sudo -E rm -rf /usr/share/dotnet /etc/mysql /etc/php /usr/local/lib/android /opt/ghc /swapfile
+      - name: Clone Source
+        run: |
+          cd /home/runner
+          bash ${GITHUB_WORKSPACE}/clone_source.sh
+          sudo chown -R runner:runner immortalwrt
+      - name: Before Build
+        run: |
+          /bin/bash ${GITHUB_WORKSPACE}/before_build.sh
+          cp -fpR ${GITHUB_WORKSPACE}/. /home/runner/immortalwrt/
 
-    - name: Initialization environment
-      env:
-        DEBIAN_FRONTEND: noninteractive
-      run: |
-        docker rmi `docker images -q`
-        sudo rm -rf /usr/share/dotnet /etc/mysql /etc/php /etc/apt/sources.list.d /usr/local/lib/android
-        sudo -E apt-get -y purge azure-cli ghc* zulu* hhvm llvm* firefox google* dotnet* powershell openjdk* adoptopenjdk* mysql* php* mongodb* dotnet* moby* snapd* || true
-        sudo -E apt-get update
-        sudo -E apt-get -y install build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev patch python3 unzip zlib1g-dev lib32gcc1 libc6-dev-i386 subversion flex uglifyjs gcc-multilib g++-multilib p7zip p7zip-full msmtp libssl-dev texinfo libglib2.0-dev xmlto qemu-utils upx libelf-dev autoconf automake libtool autopoint device-tree-compiler antlr3 gperf swig
-        sudo -E apt-get -y autoremove --purge
-        sudo -E apt-get clean
-        sudo timedatectl set-timezone "$TZ"
-        ARR_BOARD=("lepotato" "odroidn2")
-        if  [[ -n "${{ github.event.inputs.set_board }}" && -n "$(echo "${ARR_BOARD[@]}" | grep -w "${{ github.event.inputs.set_board }}")" ]]; then
-            set_board="${{ github.event.inputs.set_board }}"
-        else
-            set_board="lepotato"
-        fi
-        echo "ARMBIAN_BOARD=${set_board}" >> $GITHUB_ENV
-        df -h
-        
-    - name: Clone source code
-      run: |
-        git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
-        cd openwrt
-        useVersionInfo=$(git show -s --date=short --format="date: %cd<br/>commit: %s<br/>commit hash: %H")
-        echo "useVersionInfo=$useVersionInfo" >> $GITHUB_ENV
-        echo "DATE=$(date "+%Y-%m-%d %H:%M:%S")" >> $GITHUB_ENV
-        echo "tag_name=x86$(date +%Y%m%d%H%M)" >> $GITHUB_ENV
-        
-    - name: Update feeds
-      run: |
-        [ -e files ] && mv files openwrt/files
-        [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
-        chmod +x $SCRIPT_SH
-        ./$SCRIPT_SH
-        cd openwrt
-        sed -i 's/#src-git helloworld/src-git helloworld/g' ./feeds.conf.default
-        ./scripts/feeds update -a
-        
-    - name: Install feeds
-      run: |
-        cd openwrt
-        ./scripts/feeds install -a
-        
-    - name: Load custom configuration
-      run: |
-        chmod +x $CONFIG_SH
-        ./$CONFIG_SH
-        
-    - name: Download package
-      run: |
-        cd openwrt
-        make defconfig
-        make download -j8
-        find dl -size -1024c -exec rm -f {} \;
-        
-    - name: Compile the firmware
-      run: |
-        cd openwrt
-        echo -e "$(nproc) thread compile"
-        make -j$(nproc) || make -j1 V=s
-        echo "======================="
-        echo "Space usage:"
-        echo "======================="
-        df -h
-        echo "======================="
-        du -h --max-depth=1 ./ --exclude=build_dir --exclude=bin
-        du -h --max-depth=1 ./build_dir
-        du -h --max-depth=1 ./bin
-        echo "::set-output name=status::success"
-        
-    - name: Organize files
-      id: organize
-      if: env.UPLOAD_FIRMWARE == 'true' && !cancelled()
-      run: |
-        cd openwrt/bin/targets/*/*
-        rm -rf packages openwrt-x86-64-generic-kernel.bin openwrt-x86-64-generic-squashfs-combined-efi.vmdk sha256sums version.buildinfo feeds.buildinfo openwrt-armvirt-64-rootfs-ext4.img openwrt-x86-64-generic.manifest
-        echo "FIRMWARE=$PWD" >> $GITHUB_ENV
-        echo "::set-output name=status::success"
-        
-    - name: Upload firmware directory
-      uses: actions/upload-artifact@v2
-      if: steps.organize.outputs.status == 'success' && !cancelled()
-      with:
-        name: OpenWrt_x86_firmware
-        path: ${{ env.FIRMWARE }}
-
-    - name: Create release
-      uses: ncipollo/release-action@v1
-      with:
-        name: ${{ env.DATE }} X86-OpenWrt 自动编译
-        allowUpdates: true
-        tag: ${{ env.tag_name }}
-        commit: main
-        token: ${{ secrets.RELEASES_TOKEN }}
-        body: |
-          编译使用版本:
-          ${{ env.useVersionInfo }}
-        artifacts: "${{ env.FIRMWARE }}/*"
-        
-    - name: Remove old Releases
-      uses: dev-drprasad/delete-older-releases@v0.1.0
-      if: env.DELETE_RELEASE == 'true'
-      with:
-        keep_latest: 7
-        delete_tags: true
-      env:
-        GITHUB_TOKEN: ${{ secrets.RELEASES_TOKEN }}
+      - name: Start Build
+        run: |
+          cd /home/runner/immortalwrt
+          mv .config_immortalwrt .config
+          rm -f .config.old
+          make defconfig; make -j$[$(nproc)+1]; rm -rf build_dir/target* build_dir/toolchain* staging_dir/target* staging_dir/toolchain*
+      - name: After Build
+        run: |
+          /bin/bash /home/runner/immortalwrt/after_build.sh
+      - name: Upload Packages
+        uses: actions/upload-artifact@v3
+        with:
+          name: Packages
+          path: /home/runner/immortalwrt/bin/packages/
+      - name: Upload Firmwares
+        uses: actions/upload-artifact@v3
+        with:
+          name: Firmwares
+          path: /home/runner/immortalwrt/bin/targets/
